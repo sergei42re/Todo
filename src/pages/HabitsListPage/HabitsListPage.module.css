@@ -1,0 +1,15 @@
+.wrapper {
+    margin-top: 32px;
+    padding: 0 16px;
+}
+
+.card {
+    /* Можно добавить небольшой отступ внутри карточек */
+    padding: 16px;
+}
+
+.checkboxRow {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}

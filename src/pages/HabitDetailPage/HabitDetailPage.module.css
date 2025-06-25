@@ -1,0 +1,65 @@
+/* HabitDetailPage.module.css */
+
+.wrapper {
+    padding: 20px;
+}
+
+/* Стили для заголовка привычки */
+.title {
+    margin-bottom: 24px;
+    color: #1976d2; /* Цвет акцента MUI */
+}
+
+/* Контейнер для дней выполнения */
+.daysContainer {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+
+/* Стили для кнопок действий */
+.actionsContainer {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+/* Кастомные стили для кнопок дней */
+.dayButton {
+    min-width: 60px;
+    text-transform: none;
+}
+
+/* Стили для модального окна */
+.modalContent {
+    padding: 20px;
+}
+
+/* Адаптивные стили */
+@media (max-width: 600px) {
+    .wrapper {
+        padding: 16px;
+    }
+
+    .daysContainer {
+        justify-content: center;
+    }
+
+    .actionsContainer {
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+
+/* Дополнительный стиль для завершенных дней */
+.completedDay {
+    background-color: #4caf50 !important;
+    color: white !important;
+}
+
+/* Стиль для невыполненных дней */
+.incompleteDay {
+    border-color: #f44336 !important;
+    color: #f44336 !important;
+}
