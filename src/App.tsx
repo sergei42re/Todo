@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Route, Routes } from 'react-router-dom'; // обязательно react-router-dom
 import Layout from './components/Layout';
 
