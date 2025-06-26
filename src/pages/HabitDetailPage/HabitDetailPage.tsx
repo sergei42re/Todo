@@ -1,5 +1,19 @@
-import { useState } from "react";
-import { AppBar, Toolbar, Typography, Container, Button, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Stack } from "@mui/material";
+// pages/HabitDetailPage.tsx
+import { useEffect, useMemo, useState } from "react";
+import {
+    AppBar,
+    Toolbar,
+    Typography,
+    Container,
+    Button,
+    IconButton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField,
+    Stack
+} from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -9,6 +23,8 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
+import type { FC } from "react";
+import type { Habit } from "../../types/habit";
 import styles from "./HabitDetailPage.module.css";
 
 const habitSchema = z.object({
@@ -17,53 +33,71 @@ const habitSchema = z.object({
 
 type HabitForm = z.infer<typeof habitSchema>;
 
-interface Habit {
-    id: string;
-    title: string;
-    completedDays: Record<string, boolean>;
+interface HabitDetailPageProps {
+    habits: Habit[];
+    setHabits: (callback: (prev: Habit[]) => Habit[]) => void;
 }
 
-export const HabitDetailPage = () => {
-    const navigate = useNavigate();
+export const HabitDetailPage: FC<HabitDetailPageProps> = ({ habits, setHabits }) => {
     const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
 
-    const [habit, setHabit] = useState<Habit>({
-        id: id || "1",
-        title: "Утренняя зарядка",
-        completedDays: {},
-    });
-
+    const habit = habits.find(h => h.id === id);
     const [editOpen, setEditOpen] = useState(false);
 
-    const { control, handleSubmit, formState: { errors } } = useForm<HabitForm>({
+    const { control, handleSubmit, reset, formState: { errors } } = useForm<HabitForm>({
         resolver: zodResolver(habitSchema),
-        defaultValues: { title: habit.title },
     });
 
+    useEffect(() => {
+        if (habit) reset({ title: habit.title });
+    }, [habit, reset]);
+
+    const last5days = useMemo(() => {
+        return Array.from({ length: 5 }, (_, i) => {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            return d.toISOString().slice(0, 10);
+        }).reverse();
+    }, []);
+
+    const toggleDay = (day: string) => {
+        if (!habit) return;
+        setHabits(prev => prev.map(h =>
+            h.id === habit.id
+                ? {
+                    ...h,
+                    completedDays: {
+                        ...h.completedDays,
+                        [day]: !h.completedDays[day],
+                    },
+                }
+                : h
+        ));
+    };
+
     const onEdit = (data: HabitForm) => {
-        setHabit(h => ({ ...h, title: data.title }));
+        if (!habit) return;
+        setHabits(prev => prev.map(h => h.id === habit.id ? { ...h, title: data.title } : h));
         setEditOpen(false);
     };
 
     const onDelete = () => {
+        if (!habit) return;
+        setHabits(prev => prev.filter(h => h.id !== habit.id));
         navigate("/");
     };
 
-    const last5days = Array.from({ length: 5 }, (_, i) => {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        return d.toISOString().slice(0, 10);
-    }).reverse();
-
-    const toggleDay = (day: string) => {
-        setHabit(h => ({
-            ...h,
-            completedDays: {
-                ...h.completedDays,
-                [day]: !h.completedDays[day],
-            },
-        }));
-    };
+    if (!habit) {
+        return (
+            <Container>
+                <Typography variant="h5">Привычка не найдена</Typography>
+                <Button onClick={() => navigate("/")} variant="outlined" sx={{ mt: 2 }}>
+                    На главную
+                </Button>
+            </Container>
+        );
+    }
 
     return (
         <>
@@ -119,7 +153,7 @@ export const HabitDetailPage = () => {
             <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="sm" fullWidth>
                 <DialogTitle>Редактировать привычку</DialogTitle>
                 <DialogContent className={styles.modalContent}>
-                    <form onSubmit={handleSubmit(onEdit)} id="edit-habit-form">
+                    <form onSubmit={handleSubmit(onEdit)} id="edit-habit-form" noValidate>
                         <Controller
                             name="title"
                             control={control}
